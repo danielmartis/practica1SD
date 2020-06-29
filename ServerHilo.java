@@ -85,16 +85,17 @@ public class ServerHilo extends Thread {
                     //Enviar a cliente
                 }
             } else {
-                out.println("HTTP/1.1 404 Not Found");
+                out.println("HTTP/1.1 200 OK");
                 out.println("Content-Type: text/html; charset=utf-8");
                 out.println("Server: MyHTTPServer");
                 out.println("");
-                br1 = new BufferedReader(new FileReader("404.html"));
-                data = br1.readLine();
-                while (data != null){
-                    out.println(data);
-                    data = br1.readLine();
-                }
+                out.println(datos);
+                //br1 = new BufferedReader(new FileReader("404.html"));
+                //data = br1.readLine();
+                //while (data != null){
+                    //out.println(data);
+                    //data = br1.readLine();
+                //}
             }
                 
 
@@ -164,40 +165,31 @@ public class ServerHilo extends Thread {
                             cadena = aux[1];
                         }
                         System.out.println(aux.length);
-                        if (cadena.equals("controladorSD") && aux.length > 2) {
+                        if (cadena.equals("controladorSD")) {
+                            System.out.println("Entrado en controlador");
                             //Creamos el socket para conectarnos al controlador
                             try {
                                 controlador = new Socket(ipController, puertoHilo);
                             } catch (Exception ex) {
                                 System.err.println("No se ha podido conectar con el controlador: " + ex);
                             }
+                            if(aux.length > 2)
                             //peticion RMI a Controller
                             respuesta = aux[2];
                             //En el caso de devolver error, algún parámetro no se habrá introducido bien
-                            System.out.println(respuesta);
                             escribeSocket(controlador, respuesta);
                             respuesta = "";
                             while (respuesta.isEmpty()) {
                                 respuesta = readSocket(controlador, respuesta);
                             }
+                            System.out.println(respuesta);
                             //Para asegurarse de que respuesta recibe algo que se pueda copiar
                             cadena = respuesta;
+                            writeSocket(cliente,cadena);
 
                             //                         respuesta = "error";
                         }
-                        else if (cadena.equals("controladorSD")){
-                            try {
-                                controlador = new Socket(ipController, puertoHilo);
-                            }catch (Exception ex){
-                                System.err.println("No se ha podido conectar con el controlador: " + ex);
-                            }
-                            respuesta = "";
-                            escribeSocket(controlador, respuesta);
-                            while(respuesta.isEmpty()){
-                                respuesta = readSocket(controlador,respuesta);
-                            }
-                            cadena = respuesta;
-                        }
+
                         //System.out.println(cadena); //Muestra el nombre del fichero solicitado por el explorador
                         else if (cadena.equals("favicon.ico")) {
                             break;
@@ -254,7 +246,6 @@ public class ServerHilo extends Thread {
 
             //cliente.close();
         } catch (Exception ex) {
-
             System.err.println("Se ha producido un error y no se ha podido abrir el servidor: " + ex);
         }
         //Siempre cierra el socket

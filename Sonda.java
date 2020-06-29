@@ -30,10 +30,10 @@ public class Sonda extends UnicastRemoteObject implements Serializable, Interfaz
                 throw new Exception();
             }
         } catch (Exception e){
+	    System.out.println("Error");
             this.volumen = 0;
             this.led = 0;
-            this.ultimaFecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
-;
+            //this.ultimaFecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
             setData("./Sonda" +id+".txt"); 
         }
     }
@@ -109,19 +109,20 @@ public class Sonda extends UnicastRemoteObject implements Serializable, Interfaz
                     String aux[]=lect.split("=");
                     if(!aux[1].isEmpty()){
                         if(lect.contains("Volumen=")){
-                           setVolumen(Integer.parseInt(aux[1]));
+                           this.volumen = Integer.parseInt(aux[1]);
                         }
                         else if(lect.contains("UltimaFecha=")){
                             setUltimaFecha(aux[1]);
                         }
                         else if(lect.contains("Led=")){
-                            setLed(Integer.parseInt(aux[1]));
+                            this.led = Integer.parseInt(aux[1]);
                         }
                     }
                     lect =br1.readLine();
                 }
                 br1.close();
                 file.close();
+                setData("./Sonda"+id+".txt");
             }
         } catch (Exception ex) {
             System.err.println("No se ha podido leer el fichero: "+ex);
@@ -139,7 +140,7 @@ public class Sonda extends UnicastRemoteObject implements Serializable, Interfaz
                 bw = new BufferedWriter(new FileWriter(a));
             }
             String text;
-            text = "Volumen="+volumen+"\n"+"UltimaFecha="+ultimaFecha+"\n"+"Led"+led;
+            text = "Volumen="+volumen+"\n"+"UltimaFecha="+ultimaFecha+"\n"+"Led="+led;
             bw.write(text);
             bw.close();
         }catch(Exception e){

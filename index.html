@@ -14,23 +14,23 @@
 <h2 style="text-align: center">Practica Parking (Sockets y RMI)</h2>
 <div style="margin: 2rem auto" align="center" font-size="15px">
     <font size="6">
-    <p> Para ver las sondas pulsa aqui: <br><button class ="astext" id="/controladorSD/" onclick="controlador()">Sondas </button>
+    <p> Para ver las sondas pulsa aqui: <br><a href=/controladorSD/index>Sondas</a>
     </font>
     <font size="6">
-    <p> Para ver el volumen de la sonda 1 pulsa aqui: <br><button onclick="volumen1()">Volumen 1 </button>
+    <p> Para ver el volumen de la sonda 1 pulsa aqui: <br><a href=/controladorSD/volumen?sonda=1>Volumen sonda 1 </a>
     </font>
     <font size="6">
-    <p> Para ver la ultima fecha de la sonda 1 pulsa aqui: <br><button onclick="ultimafecha()"> Fecha 1 </button>
+    <p> Para ver la ultima fecha de la sonda 1 pulsa aqui: <br><a href=/controladorSD/fecha?sonda=1> Fecha sonda 1 </a>
     </font>
     <font size="6">
-    <p> Para ver la luz de la sonda 1 pulsa aqui: <br><button onclick="luz()"> Luz 1</button>
+    <p> Para ver la luz de la sonda 1 pulsa aqui: <br><a href=/controladorSD/luz?sonda=1> Luz sonda 1</a>
     </font>
 </div>
 </body>
 <script>
     function controlador() {
             var url = window.location;
-            var nuevaurl = url + "controladorSD/"
+            var url = url + "controladorSD/"
             location.href = nuevaurl;
     }
 </script>

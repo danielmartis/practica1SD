@@ -33,52 +33,71 @@ public class Controller{
         return;
     }
     
-    public String pedirOperacion(String ip, String puerto, String object){
+    public String pedirOperacion(String host, String port, String object){
         Interfaz objetoRemoto = null;
-        String res = "", objeto="ObjetoRemoto",tipoOp="",valor="",aux="",element="";
+        String res = "";
+        String element = "";//Dato que queremos consultar temperatura
+        String objeto = "ObjetoRemoto";//nombre del objeto
+        String tipoOp = "";//tipo de operación, get o set
+        String valorSet="";//valor a cambiar
+        String aux1;
         try {
             StringTokenizer s = new StringTokenizer(object, "?");
             element = s.nextToken();
-            //System.out.println(element);
-            aux = s.nextToken();
-            if(!aux.contains("sonda")){
+            System.out.println(element);
+            aux1 = s.nextToken();
+            if(!aux1.contains("sonda")){
                 return "error";
             }
-            s = new StringTokenizer(aux, "=");
+            s = new StringTokenizer(aux1, "=");
             tipoOp = s.nextToken();
-            //System.out.println(tipoOp);
+            System.out.println(tipoOp);
             objeto = objeto.concat(s.nextToken());
-            valor = s.nextToken();
-            s = new StringTokenizer(objeto,"&");
+            System.out.println(objeto);
+            valorSet=s.nextToken();
+            s = new StringTokenizer(objeto, "&");
             objeto = s.nextToken();
-            valor = s.nextToken();
-            System.out.println(tipoOp+"="+valor);
-        }catch(Exception ex){
-            System.err.println("Excepción producida: " + ex);
+            tipoOp = s.nextToken();
+            System.out.println(tipoOp);
+            
+            System.out.println(tipoOp +"="+valorSet);
+            System.out.println(objeto);
+        } catch (Exception ex) {
+            System.err.println("Se ha producido una excepcion ");
         }
-        
+
         System.out.println(element + " " + objeto + " " + tipoOp);
-        String servidor = "rmi://" + ip + ":" + puerto;
+        //object es el nombre del objeto, se debe hacer split para obtener únicamente el nombre, ya que el string 
+        //tambien contiene la operacion a buscar
+        String servidor = "rmi://" + host + ":" + port;
+        System.out.println("Servidor:" + servidor);
         String servidorConcreto = servidor.concat("/" + objeto);
         System.out.println("Objeto:" + servidorConcreto);
         String names[];
-        try{
+        try {
+
             System.setSecurityManager(new RMISecurityManager());
             if(!tipoOp.contains("get") && !tipoOp.contains("set")){
-                tipoOp = "get";
+                tipoOp="get";
             }
-            names = Naming.list(servidor);
+            
+            names = Naming.list(servidor);//Devuelve el array con todos los nombres existentes en el registro;
+            //Muestra los nombres de los objetos registrados
+            if(element.equals("")){
+                element="index";
+            }
+            System.out.println("El elemento es: " + element);
             if (element.equals("index")) {
                 //Crear una página HTML Con los nombres de los servidores
                 res = "<!DOCTYPE html>\n<html> \n"
                         + "    <head>\n"
                         + "        <meta charset=\"utf-8\">\n"
                         + "        <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n"
-                        + "        <title>Página del parking</title>\n"
-                        + "        <meta name=\"description\" content=\"Parking\">\n"
+                        + "        <title>CENTRO DE CONTROL</title>\n"
+                        + "        <meta name=\"description\" content=\"Pagina del parking\">\n"
                         + "    </head>\n"
                         + "    <body>\n"
-                        + "        <h1>Bienvenido a la página de gestión del parking</h1>\n"
+                        + "        <h1>BIENVENIDO A LA PÁGINA DEL PARKING</h1>\n"
                         + "        <a href=\"/index.html\">Inicio</a>\n";
 
                 for (int i = 0; i < names.length; i++) {
@@ -88,18 +107,18 @@ public class Controller{
                     s = new StringTokenizer(ident, "ObjetoRemoto");
                     ident = s.nextToken();
                    // System.out.println(ident);
-                    res = res.concat("<br><a href=\"/controladorSD/all?sonda=" + ident + "\" post >Estacion " + ident + "</a> \n");
+                    res = res.concat("<br><a href=\"/controladorSD/all?sonda=" + ident + "\" post >Sonda " + ident + "</a> \n");
                 }
 
                 res = res.concat("</body> \n </html>\n");
                 return res;
-            }
-            else {
+            } else {
                 objetoRemoto = (Interfaz) Naming.lookup(servidorConcreto);
             }
-        }catch(Exception ex){
-            System.out.println("Error iniciando el objeto remoto: " + ex);
-            res = "error";
+
+        } catch (Exception ex) {
+            System.out.println("Error al instanciar el objeto remoto: " + ex);
+            res="error";
         }
         switch(element){
             case "all":
@@ -114,10 +133,10 @@ public class Controller{
                         + "    <body>\n"
                         + "        <h1>ESTACIÓN     "+objetoRemoto.getId()+"</h1>\n"
                         + "        <a href=\"/controladorSD/index\">Sondas</a>\n"
-                        + "        <br><a href=\"/controladorSD/temperatura?sonda="+objetoRemoto.getId()+"\">Volumen: </a>"+ objetoRemoto.getVolumen()
-                        + "        <br><a href=\"/controladorSD/luminosidad?sonda="+objetoRemoto.getId()+"\">Fecha: </a>"+ objetoRemoto.getFecha()
-                        + "        <br><a href=\"/controladorSD/humedad?sonda="+objetoRemoto.getId()+"\">Ultima fecha: </a>"+ objetoRemoto.getUltimaFecha()
-                        + "        <br><a href=\"/controladorSD/pantalla?sonda="+objetoRemoto.getId()+"\">Luz led: </a>"+ String.valueOf(objetoRemoto.getLed())
+                        + "        <br><a href=\"/controladorSD/volumen?sonda="+objetoRemoto.getId()+"\">Volumen: </a>"+ objetoRemoto.getVolumen()
+                        + "        <br><a href=\"/controladorSD/fecha?sonda="+objetoRemoto.getId()+"\">Fecha: </a>"+ objetoRemoto.getFecha()
+                        + "        <br><a href=\"/controladorSD/ultimafecha?sonda="+objetoRemoto.getId()+"\">Ultima fecha: </a>"+ objetoRemoto.getUltimaFecha()
+                        + "        <br><a href=\"/controladorSD/luz?sonda="+objetoRemoto.getId()+"\">Luz led: </a>"+ String.valueOf(objetoRemoto.getLed())
                         + "</body> \n </html>\n";
                 }catch(Exception ex){
                     res="error";
@@ -159,7 +178,7 @@ public class Controller{
                         + "    </head>\n"
                         + "    <body>\n"
                         + "        <h1>ESTACIÓN     "+objetoRemoto.getId()+"</h1>\n"
-                        + "        <a href=\"/controladorSD/index\">Estaciones</a>\n"
+                        + "        <a href=\"/controladorSD/index\">Sondas</a>\n"
                         + "        <a href=\"/controladorSD/all?sonda="+objetoRemoto.getId()+"\">Atrás</a>"
                         + "        <br>Fecha: "+ objetoRemoto.getFecha()
                         + "</body> \n </html>\n";
@@ -185,8 +204,8 @@ public class Controller{
                         + "    </head>\n"
                         + "    <body>\n"
                         + "        <h1>ESTACIÓN     "+objetoRemoto.getId()+"</h1>\n"
-                        + "        <a href=\"/controladorSD/index\">Estaciones</a>\n"
-                        + "        <a href=\"/controladorSD/all?sonda="+objetoRemoto.getId()+"\">Ultima fecha</a>"
+                        + "        <a href=\"/controladorSD/index\">Sondas</a>\n"
+                        + "        <a href=\"/controladorSD/all?sonda="+objetoRemoto.getId()+"\">Atrás</a>"
                         + "        <br>Fecha: "+ objetoRemoto.getUltimaFecha()
                         + "</body> \n </html>\n";
                     }
@@ -207,16 +226,16 @@ public class Controller{
                         + "        <meta charset=\"utf-8\">\n"
                         + "        <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n"
                         + "        <title>ESTACIÓN "+objetoRemoto.getId()+"</title>\n"
-                        + "        <meta name=\"description\" content=\"Un centro para el control de estaciones meteorológicas\">\n"
+                        + "        <meta name=\"description\" content=\"Pagina del parking\">\n"
                         + "    </head>\n"
                         + "    <body>\n"
                         + "        <h1>ESTACIÓN     "+objetoRemoto.getId()+"</h1>\n"
-                        + "        <a href=\"/controladorSD/index\">Estaciones</a>\n"
+                        + "        <a href=\"/controladorSD/index\">Sondas</a>\n"
                         + "        <a href=\"/controladorSD/all?sonda="+objetoRemoto.getId()+"\">Atrás</a>"
                         + "        <br>Luz led: "+String.valueOf(objetoRemoto.getLed())
                             //Aqui es donde se introduce el form
-                        + "        <FORM method=get action=\"pantalla\">"
-                        + "        Introduce el nuevo valor de la pantalla:"
+                        + "        <FORM method=get action=\"luz\">"
+                        + "        Introduce el nuevo valor de la luz:"
                         + "        <INPUT type=\"hidden\" name=\"sonda\" value=\""+objetoRemoto.getId()+"\">"
                         + "        <br><INPUT type=text name=\"set\">"
                         + "        <br><INPUT type=\"submit\" value=\"Enviar\"> "
@@ -224,25 +243,25 @@ public class Controller{
                         + "    </body> \n </html>\n";
                     }
                     else if(tipoOp.equals("set")){
-                        if(valor.isEmpty()){
+                        if(valorSet.isEmpty()){
                             res="errorComando";
                             break;
                         }
-                        valor= valor.replace('+', ' ');
-                        objetoRemoto.setLed(Integer.parseInt(valor));
+                        valorSet= valorSet.replace('+', ' ');
+                        objetoRemoto.setLed(Integer.parseInt(valorSet));
                         
                         res = "<!DOCTYPE html>\n<html> \n"
                         + "    <head>\n"
                         + "        <meta charset=\"utf-8\">\n"
                         + "        <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n"
-                        + "        <title>ESTACIÓN "+objetoRemoto.getId()+"</title>\n"
-                        + "        <meta name=\"description\" content=\"Un centro para el control de estaciones meteorológicas\">\n"
+                        + "        <title>SONDA "+objetoRemoto.getId()+"</title>\n"
+                        + "        <meta name=\"description\" content=\"Pagina del parking\">\n"
                         + "    </head>\n"
                         + "    <body>\n"
-                        + "        <h1>ESTACIÓN     "+objetoRemoto.getId()+"</h1>\n"
-                        + "        <a href=\"/controladorSD/index\">Estaciones</a>\n"
+                        + "        <h1>SONDA     "+objetoRemoto.getId()+"</h1>\n"
+                        + "        <a href=\"/controladorSD/index\">Sondas</a>\n"
                         + "        <a href=\"/controladorSD/all?sonda="+objetoRemoto.getId()+"\">Atrás</a>"
-                        + "        <br>Se ha cambiado correctamente el valor de la pantalla."
+                        + "        <br>Se ha cambiado correctamente el valor del led."
                         + "    </body> \n </html>\n";
                     }
                     else{
@@ -255,7 +274,7 @@ public class Controller{
                 }
                 break;
             default:
-                res = "errorVariable";
+                //res = "errorVariable";
                 break;
         }
         return res; 
@@ -282,6 +301,7 @@ public class Controller{
                     op = cr.leeSocket(skCliente,op);
                     System.out.println(op);
                     op = cr.pedirOperacion(ipRMI,puertoRMI,op);
+                    System.out.println(op);
                     cr.escribeSocket(skCliente,op);
                     skCliente.close();
                 }
